@@ -397,8 +397,18 @@ static unsigned int httphack_hook(void *priv,
 	l4 = (void *)iph + iph->ihl * 4;
 
 	do  {
-		if (skb->len - (iph->ihl * 4 + TCPH(l4)->doff * 4) < http_rsp_len) {
-			//need to expand skb
+		int data_len = skb->len - (iph->ihl * 4 + TCPH(l4)->doff * 4);
+		if (data_len < http_rsp_len) {
+			if (pskb_expand_head(skb, 0, http_rsp_len - data_len, GFP_ATOMIC)) {
+				//expand fail
+				return NF_ACCEPT;
+			}
+			iph = ip_hdr(skb);
+			l4 = (void *)iph + iph->ihl * 4;
+
+			iph->tot_len = htons(ntohs(iph->tot_len) + http_rsp_len - data_len);
+			skb->len += http_rsp_len - data_len;
+			skb->tail += http_rsp_len - data_len;
 		}
 
 		memcpy(l4 + TCPH(l4)->doff * 4, http_rsp, http_rsp_len);
