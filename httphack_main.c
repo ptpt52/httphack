@@ -65,13 +65,11 @@ static inline void nf_unregister_hooks(struct nf_hook_ops *reg, unsigned int n)
 char http_url[1024] = "";
 
 #define HTTP_RSP_FMT "" \
-		"HTTP/1.1 307 Internal Redirect\r\n" \
+		"HTTP/1.1 301 Moved Permanently\r\n" \
 		"Connection: close\r\n" \
 		"Cache-Control: no-cache\r\n" \
 		"Content-Type: text/html; charset=UTF-8\r\n" \
 		"Location: %s\r\n" \
-		"Content-Security-Policy: upgrade-insecure-requests\r\n" \
-		"Strict-Transport-Security: max-age=31536000; includeSubDomains\r\n" \
 		"Content-Length: 0\r\n" \
 		"\r\n"
 
